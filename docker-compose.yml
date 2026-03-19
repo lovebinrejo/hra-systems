@@ -4,15 +4,13 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: hra_db
-      POSTGRES_USER: hra_user
-      POSTGRES_PASSWORD: hradbpassword123
+      POSTGRES_DB: ${DB_NAME:-hra_db}
+      POSTGRES_USER: ${DB_USER:-hra_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hradbpassword123}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hra_user -d hra_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hra_user} -d ${DB_NAME:-hra_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,20 +25,27 @@ services:
       context: ./hra-backend
       dockerfile: Dockerfile
     command: >
-      sh -c "python manage.py makemigrations accounts employees leaves attendance events payslips notifications &&
-             python manage.py migrate &&
+      sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
-             python manage.py runserver 0.0.0.0:8000"
+             gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"
     volumes:
-      - ./hra-backend:/app
       - media_files:/app/media
     ports:
       - "8000:8000"
-    env_file:
-      - ./hra-backend/.env
     environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - SECRET_KEY=${SECRET_KEY:-changeme-generate-a-real-key}
       - DB_HOST=db
+      - DB_NAME=${DB_NAME:-hra_db}
+      - DB_USER=${DB_USER:-hra_user}
+      - DB_PASSWORD=${DB_PASSWORD:-hradbpassword123}
+      - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - CORS_ALLOW_ALL_ORIGINS=True
+      - OFFICE_LATITUDE=${OFFICE_LATITUDE:-13.0827}
+      - OFFICE_LONGITUDE=${OFFICE_LONGITUDE:-80.2707}
+      - OFFICE_RADIUS_KM=${OFFICE_RADIUS_KM:-1.0}
     depends_on:
       db:
         condition: service_healthy
@@ -53,12 +58,15 @@ services:
       dockerfile: Dockerfile
     command: celery -A config.celery worker --loglevel=info -Q default,pdf,realtime
     volumes:
-      - ./hra-backend:/app
       - media_files:/app/media
-    env_file:
-      - ./hra-backend/.env
     environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - SECRET_KEY=${SECRET_KEY:-changeme-generate-a-real-key}
       - DB_HOST=db
+      - DB_NAME=${DB_NAME:-hra_db}
+      - DB_USER=${DB_USER:-hra_user}
+      - DB_PASSWORD=${DB_PASSWORD:-hradbpassword123}
+      - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - db
@@ -69,12 +77,14 @@ services:
       context: ./hra-backend
       dockerfile: Dockerfile
     command: celery -A config.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - ./hra-backend:/app
-    env_file:
-      - ./hra-backend/.env
     environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      - SECRET_KEY=${SECRET_KEY:-changeme-generate-a-real-key}
       - DB_HOST=db
+      - DB_NAME=${DB_NAME:-hra_db}
+      - DB_USER=${DB_USER:-hra_user}
+      - DB_PASSWORD=${DB_PASSWORD:-hradbpassword123}
+      - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
     depends_on:
       - db
