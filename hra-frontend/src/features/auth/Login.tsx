@@ -59,7 +59,7 @@ const Login: React.FC = () => {
 
           {/* Left Panel — HRA Animation */}
           <div className="hidden lg:flex w-1/2 relative overflow-hidden flex-col items-center justify-center"
-            style={{ background: 'linear-gradient(160deg, #0a1628 0%, #0d2148 60%, #0a1628 100%)' }}>
+            style={{ background: 'linear-gradient(160deg, #0f3460 0%, #1a5cb8 45%, #0d3d8a 100%)' }}>
 
             <style>{`
               @keyframes hra-fadeup { 0%{opacity:0;transform:translateY(16px)} 100%{opacity:1;transform:translateY(0)} }
