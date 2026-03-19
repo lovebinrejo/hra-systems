@@ -1,0 +1,95 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: hra_db
+      POSTGRES_USER: hra_user
+      POSTGRES_PASSWORD: hradbpassword123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hra_user -d hra_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: ./hra-backend
+      dockerfile: Dockerfile
+    command: >
+      sh -c "python manage.py makemigrations accounts employees leaves attendance events payslips notifications &&
+             python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./hra-backend:/app
+      - media_files:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./hra-backend/.env
+    environment:
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  celery:
+    build:
+      context: ./hra-backend
+      dockerfile: Dockerfile
+    command: celery -A config.celery worker --loglevel=info -Q default,pdf,realtime
+    volumes:
+      - ./hra-backend:/app
+      - media_files:/app/media
+    env_file:
+      - ./hra-backend/.env
+    environment:
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build:
+      context: ./hra-backend
+      dockerfile: Dockerfile
+    command: celery -A config.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./hra-backend:/app
+    env_file:
+      - ./hra-backend/.env
+    environment:
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    build:
+      context: ./hra-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_files:

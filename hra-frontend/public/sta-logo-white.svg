@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 96">
+  <defs>
+    <clipPath id="hexW">
+      <polygon points="24,4 72,4 93,48 72,92 24,92 3,48"/>
+    </clipPath>
+  </defs>
+
+  <!-- Hexagon white background -->
+  <polygon points="24,4 72,4 93,48 72,92 24,92 3,48" fill="white"/>
+
+  <!-- 3 diagonal navy stripes (cut-through effect on white hexagon) -->
+  <g clip-path="url(#hexW)">
+    <polygon points="-5,10 100,-4 100,14 -5,28" fill="#1565C0" opacity="0.35"/>
+    <polygon points="-5,40 100,26 100,44 -5,58" fill="#1565C0" opacity="0.35"/>
+    <polygon points="-5,70 100,56 100,74 -5,88" fill="#1565C0" opacity="0.35"/>
+  </g>
+
+  <!-- STA text - white -->
+  <text x="106" y="68"
+    font-family="'Arial Black','Franklin Gothic Heavy','Arial Bold',sans-serif"
+    font-weight="900"
+    font-size="56"
+    fill="white">STA</text>
+
+  <!-- TECHNOLOGIES subtext - light blue -->
+  <text x="108" y="85"
+    font-family="Arial,Helvetica,sans-serif"
+    font-weight="700"
+    font-size="12"
+    fill="#93c5fd"
+    letter-spacing="5">TECHNOLOGIES</text>
+</svg>
