@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
@@ -32,7 +33,7 @@ class CheckInView(APIView):
             return Response({'error': True, 'message': 'Invalid coordinates.'}, status=status.HTTP_400_BAD_REQUEST)
 
         within_radius, distance_km = is_within_office_radius(lat, lng)
-        if not within_radius:
+        if getattr(settings, 'OFFICE_LOCATION_CHECK_ENABLED', False) and not within_radius:
             raise OutsideOfficeRadiusError(distance_km)
 
         today = timezone.localdate()

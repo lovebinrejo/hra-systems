@@ -39,10 +39,14 @@ const MyAttendance: React.FC = () => {
   const handleCheckIn = async () => {
     setActionLoading(true);
     try {
-      const pos = await getLocation();
-      await attendanceService.checkIn(pos.lat, pos.lng);
-      const accuracyMsg = pos.accuracy ? ` (±${pos.accuracy}m)` : '';
-      toast.success(`Checked in successfully!${accuracyMsg}`);
+      let lat = 0, lng = 0;
+      try {
+        const pos = await getLocation();
+        lat = pos.lat;
+        lng = pos.lng;
+      } catch { /* location optional */ }
+      await attendanceService.checkIn(lat, lng);
+      toast.success('Checked in successfully!');
       fetchData();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string };

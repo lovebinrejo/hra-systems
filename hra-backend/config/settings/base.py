@@ -203,6 +203,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 OFFICE_LATITUDE = config('OFFICE_LATITUDE', default=13.0827, cast=float)
 OFFICE_LONGITUDE = config('OFFICE_LONGITUDE', default=80.2707, cast=float)
 OFFICE_RADIUS_KM = config('OFFICE_RADIUS_KM', default=1.0, cast=float)
+OFFICE_LOCATION_CHECK_ENABLED = config('OFFICE_LOCATION_CHECK_ENABLED', default=False, cast=bool)
 
 # ─── Security Headers (overridden in production) ───────────────────────────────
 SECURE_BROWSER_XSS_FILTER = True
