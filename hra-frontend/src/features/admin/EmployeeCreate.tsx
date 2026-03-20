@@ -27,7 +27,9 @@ const EmployeeCreate: React.FC = () => {
   const onSubmit = async (data: CreateForm) => {
     setLoading(true);
     try {
-      const emp = await employeeService.createEmployee(data as unknown as Record<string, unknown>);
+      const payload = { ...data } as Record<string, unknown>;
+      if (!data.join_date) delete payload.join_date;
+      const emp = await employeeService.createEmployee(payload);
       toast.success(`${emp.data.full_name} created successfully!`);
       navigate(`/admin/employees/${emp.data.id}`);
     } catch (err: unknown) {

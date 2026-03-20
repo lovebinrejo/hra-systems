@@ -80,6 +80,7 @@ const EmployeeList: React.FC = () => {
       if (!data.new_password) delete payload.new_password;
       else payload.password = data.new_password;
       delete payload.new_password;
+      if (!data.join_date) delete payload.join_date;
       await employeeService.updateEmployee(editModal.id, payload as Partial<User>);
       toast.success('Employee updated!');
       setEditModal(null);
