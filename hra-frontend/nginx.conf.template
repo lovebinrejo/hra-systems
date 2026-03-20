@@ -1,19 +1,16 @@
 server {
-    listen $PORT;
+    listen 8080;
     server_name _;
 
     root /usr/share/nginx/html;
     index index.html;
 
-    # Defer upstream DNS resolution to request time (not startup)
     resolver 8.8.8.8 valid=30s ipv6=off;
 
-    # React SPA routing
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # Proxy API to backend
     location /api/ {
         set $upstream $BACKEND_URL;
         proxy_pass $upstream;
@@ -31,7 +28,6 @@ server {
         client_max_body_size 10M;
     }
 
-    # Gzip
     gzip on;
     gzip_types text/plain application/javascript text/css application/json;
 }

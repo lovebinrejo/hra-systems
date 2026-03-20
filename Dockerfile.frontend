@@ -11,12 +11,10 @@ RUN apk add --no-cache gettext
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY hra-frontend/nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
 
-# Create entrypoint directly on Linux (avoids Windows CRLF issues)
 RUN printf '#!/bin/sh\n\
-export PORT=${PORT:-80}\n\
 export BACKEND_URL=${BACKEND_URL:-http://backend:8000}\n\
-envsubst '"'"'$PORT $BACKEND_URL'"'"' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/default.conf\n\
+envsubst '"'"'$BACKEND_URL'"'"' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/default.conf\n\
 exec nginx -g '"'"'daemon off;'"'"'\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
-EXPOSE 80
+EXPOSE 8080
 CMD ["/entrypoint.sh"]
